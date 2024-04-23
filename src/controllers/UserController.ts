@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction, request } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import UserModel from "../models/UserModel";
+import Logging from "../library/Logging";
 
 const registerUser = (
   request: Request,
@@ -44,9 +45,12 @@ const loginUser = (
   const { email, password } = request.body;
   UserModel.findOne({ email })
     .exec()
-    .then((user) => {
+    .then((user: any) => {
+      Logging.info(`User found: ${user}`);
       if (!user) {
-        return response.status(401).json({ message: "Authentication failed" });
+        return response
+          .status(401)
+          .json({ message: "This user doesn't exist" });
       }
       bcrypt.compare(password, user.password, (err, result) => {
         if (err || !result) {
@@ -60,7 +64,7 @@ const loginUser = (
               userId: user._id,
             },
             process.env.JWT_SECRET || "",
-            { expiresIn: "1h" }
+            { expiresIn: "2h" }
           );
           user.token = token; // Save the token to the user document
           user.save();
@@ -76,7 +80,7 @@ const loginUser = (
         }
       });
     })
-    .catch((err) => response.status(500).json({ error: err.message }));
+    .catch((err: any) => response.status(500).json({ error: err.message }));
 };
 
 const deleteUser = (
@@ -100,7 +104,7 @@ const updateUser = (
   const { username, email } = request.body;
   return UserModel.findByIdAndUpdate(userId, { username, email })
     .exec()
-    .then((user) => {
+    .then((user: any) => {
       if (!user) {
         return response.status(404).json({ message: "User not found!" });
       } else {
@@ -120,14 +124,14 @@ const getAllUsers = (
 ) => {
   UserModel.find()
     .exec()
-    .then((users) => {
+    .then((users: any) => {
       return response.status(200).json({
         status: "success",
         message: "Users retrieved successfully",
         users: users,
       });
     })
-    .catch((err) => response.status(500).json({ error: err.message }));
+    .catch((err: any) => response.status(500).json({ error: err.message }));
 };
 
 export default {
