@@ -14,7 +14,7 @@ mongoose
     Logging.info("Connected successfully to MongoDB");
     StartServer();
   })
-  .catch((error) => Logging.error(error));
+  .catch((error: any) => Logging.error(error));
 
 //   Step 2: Start the server(only if the database connection is successfully established)
 const StartServer = () => {
@@ -53,7 +53,7 @@ const StartServer = () => {
   router.get("/", (req, res, next) => {
     return res.status(200).json({ message: "Welcome to SnapShop Server:)" });
   });
-  router.use("/user", userRoutes);
+  router.use("/api/auth", userRoutes);
 
   // Step 4: Healthcheck
   router.get("/api/healthcheck", (req, res, next) => {
